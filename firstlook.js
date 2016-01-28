@@ -15,14 +15,21 @@
     <div id="content"></div>
     <!-- <script type="text/babel" src="scripts/example.js"></script>-->
     <script type="text/babel">
+
+          var data = [
+            {id: 1, author: "First author", text: '*First* comment'},
+            {id: 2, author: "Second author", text: 'Second comment'}
+          ];
+
+
           var CommentBox = React.createClass({displayName: 'CommentBox',
               render: function() {
                   return (
-                    React.createElement('div', {className: 'commentBox'}, 
-                      React.createElement('h1', null, "Comments"),
-                      React.createElement(CommentList, null),
-                      React.createElement(CommentForm, null)
-                     )
+                  <div className="commentBox">
+                    <h1>Comments</h1>
+                    <CommentList data={this.props.data} />
+                    <CommentForm />
+                  </div>
                   );
               }
           });
@@ -39,17 +46,28 @@
 
           var CommentList = React.createClass({
               render: function() {
-                  return (
-                    React.createElement('div', {className: 'commentList'}, 
-                      React.createElement(Comment, {author: "First author"}, 'First comment'),
-                      React.createElement(Comment, {author: "Second author"}, 'Second comment')
-                    )
+                  var commentNodes = this.props.data.map(function(comment){
+                      return(
+                        <Comment author={comment.author} key={comment.id}>
+                          {comment.text}
+                        </Comment>
+                        );
+                  });
+
+                  return(
+                    <div className="commentList">
+                      {commentNodes}
+                    </div>
                   );
               }
-          });
+            });
 
 
           var Comment = React.createClass({
+            rawMarkup: function(){
+              var rawMarkup = marked(this.props.children.toString(), {sanitize: true});
+              return {__html: rawMarkup};
+            },
             render: function(){
               var {author} = this.props;
               return (
@@ -57,7 +75,7 @@
                   <h2 className="commentAuthor">
                     {this.props.author}
                   </h2>
-                  {this.props.children}
+                  <span dangerouslySetInnerHTML={this.rawMarkup()} />
                 </div>
               );
             }
@@ -66,8 +84,8 @@
 
 
           ReactDOM.render(
-            React.createElement(CommentBox, null),
-            document.getElementById('content')
+              <CommentBox data={data} />,
+              document.getElementById('content')
             );
     </script>
 
